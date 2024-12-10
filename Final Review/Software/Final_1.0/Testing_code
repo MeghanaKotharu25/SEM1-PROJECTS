@@ -1,0 +1,34 @@
+import serial
+import time
+
+# Set up serial communication 
+arduino_port = '/dev/ttyUSB0' 
+baud_rate = 9600
+ser = serial.Serial(arduino_port, baud_rate, timeout=1)
+time.sleep(2)  # Wait for the connection to stabilize
+
+current_angle = 90  
+
+try:
+    while True:
+        # Increment the angle by 20 degrees
+        current_angle += 20
+        if current_angle > 180:  # Reset to 0 if exceeding 180 degrees
+            current_angle = 0
+        
+        # Send the angle to Arduino
+        ser.write(f"{current_angle}\n".encode('utf-8'))
+        print(f"Sent angle: {current_angle}")
+        
+        # Wait for acknowledgment
+        ack = ser.readline().decode('utf-8').strip()
+        if ack == "ACK":
+            print("Arduino acknowledged the command.")
+        else:
+            print(f"Arduino response: {ack}")
+        
+        time.sleep(2)  # Wait 2 seconds before the next command
+
+except KeyboardInterrupt:
+    print("Exiting...")
+    ser.close()
